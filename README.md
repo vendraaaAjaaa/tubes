@@ -1,6 +1,6 @@
 # Student Registration App
 
-Program ini adalah aplikasi registrasi calon mahasiswa berbasis terminal yang dibuat dengan bahasa Go. Aplikasi digunakan untuk mengelola data calon mahasiswa, jurusan yang dipilih, nilai tes, status kelulusan, pencarian data, dan laporan data mahasiswa.
+Program ini adalah aplikasi registrasi calon mahasiswa berbasis terminal yang dibuat dengan bahasa Go. Aplikasi digunakan untuk mengelola data calon mahasiswa, data jurusan, nilai tes, status kelulusan, pencarian data, dan laporan data mahasiswa.
 
 ## Cara Menjalankan Program
 
@@ -13,7 +13,7 @@ go run bigproject.go
 Program juga bisa dikompilasi terlebih dahulu:
 
 ```bash
-go build bigproject.go
+go build -o bigproject bigproject.go
 ./bigproject
 ```
 
@@ -23,23 +23,24 @@ Application Registration Student adalah aplikasi registrasi mahasiswa universita
 
 Spesifikasi aplikasi:
 
-1. Pengguna dapat melakukan penambahan, perubahan, dan penghapusan data mahasiswa serta data jurusan pada universitas.
-2. Pengguna dapat menampilkan data mahasiswa yang mendaftar pada jurusan tertentu, termasuk mahasiswa yang diterima dan ditolak.
-3. Pengguna dapat melakukan penambahan, perubahan, dan penghapusan nilai tes mahasiswa yang akan menentukan status diterima atau ditolak.
-4. Pengguna dapat menampilkan data mahasiswa yang diurutkan berdasarkan nilai tes, jurusan, dan nama mahasiswa.
+1. Pengguna dapat melakukan penambahan, perubahan, dan penghapusan data mahasiswa.
+2. Pengguna dapat melakukan penambahan, perubahan, dan penghapusan data jurusan.
+3. Pengguna dapat melakukan penambahan, perubahan, dan penghapusan nilai tes mahasiswa.
+4. Program menentukan status mahasiswa berdasarkan nilai tes.
+5. Pengguna dapat menampilkan data mahasiswa berdasarkan jurusan dan status penerimaan.
+6. Pengguna dapat mencari mahasiswa menggunakan Sequential Search dan Binary Search.
+7. Pengguna dapat menampilkan data mahasiswa yang diurutkan berdasarkan nilai, nama, dan jurusan.
 
 ## Spesifikasi Umum
 
 1. Program dibuat secara modular dengan menggunakan subprogram berupa fungsi dan prosedur.
-2. Setiap subprogram dilengkapi parameter dan spesifikasi berupa kondisi awal atau I.S. dan kondisi akhir atau F.S.
-3. Program mengimplementasikan array dan tipe bentukan struktur.
-4. Array yang digunakan adalah array statis, bukan array dinamis atau slice.
-5. Program mengimplementasikan Sequential Search dan Binary Search pada proses pencarian data.
-6. Program mengimplementasikan Selection Sort dan Insertion Sort untuk pengurutan data dengan kategori berbeda.
-7. Setiap kategori pengurutan dapat ditampilkan secara ascending maupun descending.
-8. Rekursif tidak wajib diimplementasikan, tetapi dapat menjadi nilai tambahan.
-9. Program tidak menggunakan statement `break` dan `continue`.
-10. Variabel global hanya digunakan untuk data array utama yang diolah.
+2. Program mengimplementasikan array dan tipe bentukan struktur.
+3. Array yang digunakan adalah array statis, bukan array dinamis atau slice.
+4. Program mengimplementasikan Sequential Search dan Binary Search pada proses pencarian data.
+5. Program mengimplementasikan Selection Sort dan Insertion Sort untuk pengurutan data.
+6. Setiap kategori pengurutan dapat ditampilkan secara ascending atau descending.
+7. Program tidak menggunakan statement `break` dan `continue`.
+8. Variabel global digunakan untuk array utama mahasiswa dan jurusan beserta jumlah datanya.
 
 ## Struktur Data
 
@@ -47,12 +48,16 @@ Data utama disimpan dalam array statis:
 
 ```go
 const MaxStudents = 100
+const MaxDepts = 50
 
 var students [MaxStudents]Student
 var studentCount int
+
+var departments [MaxDepts]Department
+var deptCount int
 ```
 
-Tipe bentukan yang digunakan:
+Tipe bentukan untuk mahasiswa:
 
 ```go
 type Student struct {
@@ -64,7 +69,7 @@ type Student struct {
 }
 ```
 
-Keterangan field:
+Keterangan field `Student`:
 
 1. `ID`: nomor atau kode unik mahasiswa.
 2. `Name`: nama lengkap calon mahasiswa.
@@ -72,15 +77,30 @@ Keterangan field:
 4. `Score`: nilai tes mahasiswa.
 5. `Status`: status seleksi, yaitu `Pending`, `Accepted`, atau `Rejected`.
 
+Tipe bentukan untuk jurusan:
+
+```go
+type Department struct {
+    ID   string
+    Name string
+}
+```
+
+Keterangan field `Department`:
+
+1. `ID`: kode unik jurusan.
+2. `Name`: nama jurusan.
+
 ## Flow Program
 
 Saat program dijalankan, fungsi `main()` menampilkan menu utama:
 
 ```text
 1. Student Management
-2. Score & Evaluation
-3. Search Student
-4. View Reports
+2. Department Management
+3. Score & Evaluation
+4. Search Student
+5. View Reports
 0. Exit
 ```
 
@@ -113,27 +133,57 @@ Fungsi yang digunakan:
 
 Pada proses edit dan delete, program mencari mahasiswa menggunakan `sequentialSearchByID()`.
 
-## Flow Score & Evaluation
+## Flow Department Management
 
-Menu `Score & Evaluation` digunakan untuk memberikan atau mengubah nilai tes mahasiswa.
+Menu `Department Management` digunakan untuk mengelola data jurusan.
+
+```text
+1. Add Department
+2. Edit Department
+3. Delete Department
+0. Back
+```
 
 Fungsi yang digunakan:
 
-1. `evaluateStudent()`: mencari mahasiswa berdasarkan ID, menerima input nilai, lalu menentukan status.
+1. `addDepartment()`: menambahkan jurusan baru ke array `departments`.
+2. `editDepartment()`: mengubah nama jurusan berdasarkan ID.
+3. `deleteDepartment()`: menghapus jurusan berdasarkan ID.
+4. `departmentManagementMenu()`: mengatur alur submenu manajemen jurusan.
+5. `sequentialSearchDeptByID(id string) int`: mencari jurusan berdasarkan ID.
+
+Data jurusan yang sudah ditambahkan akan ditampilkan sebagai referensi saat user menambah atau mengubah data mahasiswa.
+
+## Flow Score & Evaluation
+
+Menu `Score & Evaluation` digunakan untuk mengelola nilai tes mahasiswa.
+
+```text
+1. Add / Edit Score
+2. Delete Score  (reset to Pending)
+0. Back
+```
+
+Fungsi yang digunakan:
+
+1. `addEditScore()`: mencari mahasiswa berdasarkan ID, menerima input nilai, lalu menentukan status.
+2. `deleteScore()`: menghapus nilai mahasiswa dengan mengatur nilai menjadi `0` dan status menjadi `Pending`.
+3. `scoreMenu()`: mengatur alur submenu nilai dan evaluasi.
 
 Aturan status:
 
 1. Jika nilai `>= 75`, status menjadi `Accepted`.
 2. Jika nilai `< 75`, status menjadi `Rejected`.
-3. Mahasiswa baru memiliki status awal `Pending`.
+3. Jika nilai dihapus, status kembali menjadi `Pending`.
+4. Mahasiswa baru memiliki status awal `Pending`.
 
 ## Flow Search Student
 
 Menu `Search Student` digunakan untuk mencari data mahasiswa.
 
 ```text
-1. Sequential Search by ID
-2. Binary Search by Name
+1. Sequential Search  (by ID)
+2. Binary Search      (by Name)
 0. Back
 ```
 
@@ -168,7 +218,10 @@ Fungsi yang digunakan:
 
 ### Sequential Search
 
-Sequential Search digunakan pada fungsi `sequentialSearchByID(id string) int`.
+Sequential Search digunakan pada:
+
+1. `sequentialSearchByID(id string) int`
+2. `sequentialSearchDeptByID(id string) int`
 
 Cara kerja:
 
@@ -177,7 +230,7 @@ Cara kerja:
 3. Jika ID ditemukan, fungsi mengembalikan indeks data.
 4. Jika tidak ditemukan, fungsi mengembalikan `-1`.
 
-Algoritma ini digunakan pada proses pencarian, edit, delete, dan evaluasi nilai mahasiswa berdasarkan ID.
+Algoritma ini digunakan pada proses pencarian, edit, delete, dan evaluasi nilai berdasarkan ID.
 
 ### Binary Search
 
@@ -220,9 +273,11 @@ Insertion Sort dipakai untuk mengurutkan data berdasarkan nama dan jurusan secar
 
 ## Catatan Implementasi
 
-Program menggunakan pendekatan modular. Setiap bagian dipisahkan menjadi fungsi input, tampilan, pencarian, pengurutan, manajemen mahasiswa, evaluasi nilai, pencarian mahasiswa, laporan, dan menu utama.
+Program menggunakan pendekatan modular. Setiap bagian dipisahkan menjadi fungsi input, tampilan, pencarian, pengurutan, manajemen mahasiswa, manajemen jurusan, evaluasi nilai, pencarian mahasiswa, laporan, dan menu utama.
 
-Data jurusan pada kode ini direpresentasikan melalui field `Major` pada struct `Student`. Nilai tes dapat ditambahkan dan diubah melalui menu `Score & Evaluation`; status mahasiswa diperbarui otomatis berdasarkan nilai tersebut.
+Data mahasiswa disimpan di array `students`, sedangkan data jurusan disimpan di array `departments`. Nilai tes dapat ditambahkan, diubah, dan dihapus melalui menu `Score & Evaluation`; status mahasiswa diperbarui otomatis berdasarkan nilai tersebut.
+
+Program berjalan sepenuhnya di terminal dan menyimpan data sementara di memori selama program dijalankan.
 
 ## File Utama
 
